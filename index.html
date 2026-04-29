@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266 Joystick</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+
+        /* Pantalla del Sensor */
+        .display-sensor {
+            background: #000;
+            color: #00ff41; /* Verde Matrix */
+            padding: 15px;
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: inline-block;
+            width: 250px;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .display-sensor small {
+            color: #888;
+            letter-spacing: 2px;
+            font-size: 0.8rem;
+        }
+
+        .valor-distancia {
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Contenedor del Joystick */
+        .joystick-container {
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Estilo de los botones */
+        .btn {
+            width: 85px;
+            height: 85px;
+            margin: 8px;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 15px;
+            border: none;
+            background: #333;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px #222;
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .btn:active {
+            background: #007bff;
+            box-shadow: 0 2px #0056b3;
+            transform: translateY(3px);
+        }
+
+        .btn-center {
+            background: transparent;
+            box-shadow: none;
+            cursor: default;
+        }
+
+        .btn-center:active {
+            background: transparent;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-style: italic;
+            color: #aaa;
+        }
+
+        .update-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>PANEL DE CONTROL ESP8266</h2>
+
+    <div class="display-sensor">
+        <small>DISTANCIA ULTRASÓNICO</small>
+        <span class="valor-distancia">42 cm</span>
+    </div>
+
+    <p>Estado: <strong>En línea</strong></p>
+
+    <div class="joystick-container">
+        <div class="row">
+            <a href="#" class="btn">▲</a>
+        </div>
+        <div class="row">
+            <a href="#" class="btn">◀</a>
+            <div class="btn btn-center"></div> <a href="#" class="btn">▶</a>
+        </div>
+        <div class="row">
+            <a href="#" class="btn">▼</a>
+        </div>
+    </div>
+
+    <div class="status">
+        Último comando: <span style="color: #007bff;">NINGUNO</span>
+    </div>
+
+    <a href="#" class="update-link">ACTUALIZAR DATOS</a>
+
+</body>
+</html>
