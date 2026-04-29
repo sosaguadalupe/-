@@ -3,138 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP8266 Joystick</title>
+    <title>Control de Robot - ESP8266</title>
     <style>
         body {
             text-align: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a1a1a;
-            color: #e0e0e0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #121212;
+            color: #ffffff;
             margin: 0;
             padding: 20px;
+            user-select: none; /* Evita seleccionar texto al tocar botones */
         }
 
-        /* Pantalla del Sensor */
+        h2 {
+            color: #007bff;
+            letter-spacing: 1px;
+        }
+
+        /* Pantalla del Sensor de Proximidad */
         .display-sensor {
             background: #000;
-            color: #00ff41; /* Verde Matrix */
-            padding: 15px;
+            color: #00ff41; /* Verde neón */
+            padding: 20px;
             border: 2px solid #333;
-            border-radius: 10px;
+            border-radius: 15px;
             display: inline-block;
-            width: 250px;
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
-            margin-bottom: 30px;
+            width: 220px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            margin-bottom: 25px;
         }
 
         .display-sensor small {
             color: #888;
-            letter-spacing: 2px;
-            font-size: 0.8rem;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            display: block;
+            margin-bottom: 5px;
         }
 
         .valor-distancia {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: bold;
-            display: block;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         /* Contenedor del Joystick */
-        .joystick-container {
-            display: inline-block;
-            margin-top: 10px;
-        }
-
-        .row {
+        .joystick {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Estilo de los botones */
+        .fila {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* Estilo Circular de los Botones */
         .btn {
-            width: 85px;
-            height: 85px;
-            margin: 8px;
-            font-size: 28px;
-            font-weight: bold;
-            border-radius: 15px;
-            border: none;
-            background: #333;
+            width: 80px;
+            height: 80px;
+            background: #2c2c2c;
             color: white;
-            cursor: pointer;
-            box-shadow: 0 5px #222;
-            transition: all 0.1s;
+            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-decoration: none;
+            font-size: 1.8rem;
+            border-radius: 50%;
+            box-shadow: 0 6px #000;
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn:active {
             background: #007bff;
             box-shadow: 0 2px #0056b3;
-            transform: translateY(3px);
+            transform: translateY(4px);
         }
 
-        .btn-center {
-            background: transparent;
-            box-shadow: none;
-            cursor: default;
-        }
-
-        .btn-center:active {
-            background: transparent;
-            box-shadow: none;
-            transform: none;
-        }
-
-        .status {
-            margin-top: 20px;
-            font-style: italic;
-            color: #aaa;
-        }
-
-        .update-link {
-            display: inline-block;
+        .status-box {
             margin-top: 30px;
-            padding: 10px 20px;
-            background: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-size: 14px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        #comando-actual {
+            color: #007bff;
+            font-weight: bold;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <h2>PANEL DE CONTROL ESP8266</h2>
+    <h2>ROBOT MONITOR V1.0</h2>
 
     <div class="display-sensor">
-        <small>DISTANCIA ULTRASÓNICO</small>
-        <span class="valor-distancia">42 cm</span>
+        <small>Distancia al Obstáculo</small>
+        <span id="dist" class="valor-distancia">--</span> <span style="font-size: 1.2rem;">cm</span>
     </div>
 
-    <p>Estado: <strong>En línea</strong></p>
-
-    <div class="joystick-container">
-        <div class="row">
-            <a href="#" class="btn">▲</a>
+    <div class="joystick">
+        <div class="fila">
+            <a href="/up" class="btn">▲</a>
         </div>
-        <div class="row">
-            <a href="#" class="btn">◀</a>
-            <div class="btn btn-center"></div> <a href="#" class="btn">▶</a>
+        <div class="fila">
+            <a href="/left" class="btn">◀</a>
+            <a href="/right" class="btn">▶</a>
         </div>
-        <div class="row">
-            <a href="#" class="btn">▼</a>
+        <div class="fila">
+            <a href="/down" class="btn">▼</a>
         </div>
     </div>
 
-    <div class="status">
-        Último comando: <span style="color: #007bff;">NINGUNO</span>
+    <div class="status-box">
+        Última orden: <span id="comando-actual">Detenido</span>
     </div>
 
-    <a href="#" class="update-link">ACTUALIZAR DATOS</a>
+    <script>
+        // Esta función pide el valor a la ruta /distancia cada 500ms
+        setInterval(function() {
+            fetch('/distancia')
+                .then(response => {
+                    if (!response.ok) throw new Error('Cargando...');
+                    return response.text();
+                })
+                .then(data => {
+                    document.getElementById('dist').innerHTML = data;
+                })
+                .catch(err => {
+                    // Aquí podrías manejar si se pierde la conexión
+                });
+        }, 500);
+    </script>
 
 </body>
 </html>
