@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Robot Control – UTEC</title>
+<title>Auto Control – UTEC</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -255,7 +255,7 @@
       <span class="logo-sub">Universidad Tecnológica</span>
     </div>
   </div>
-  <span class="header-title">Panel de Control · Robot</span>
+  <span class="header-title">Panel de Control · Auto</span>
 </div>
 
 <div class="sensor-card">
@@ -309,6 +309,14 @@
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   }
 
+  const DIR_MAP = {
+    right: { ruta: '/right', label: 'DERECHA' },
+    left:  { ruta: '/left',  label: 'IZQUIERDA' },
+    up:    { ruta: '/up',    label: 'ADELANTE' },
+    down:  { ruta: '/down',  label: 'ATRÁS' },
+    stop:  { ruta: '/stop',  label: 'STOP' },
+  };
+
   function getDir(dx, dy) {
     const dist = Math.sqrt(dx*dx + dy*dy);
     if (dist < 22) return 'stop';
@@ -330,8 +338,8 @@
 
     if (dir !== currentCmd) {
       currentCmd = dir;
-      fetch('/' + dir).catch(() => {});
-      cmdEl.textContent = dir.toUpperCase();
+      fetch(DIR_MAP[dir].ruta).catch(() => {});
+      cmdEl.textContent = DIR_MAP[dir].label;
       dotEl.classList.toggle('on', dir !== 'stop');
     }
   }
@@ -342,8 +350,8 @@
     Object.values(arrows).forEach(a => a.classList.remove('active'));
     if (currentCmd !== 'stop') {
       currentCmd = 'stop';
-      fetch('/stop').catch(() => {});
-      cmdEl.textContent = 'STOP';
+      fetch(DIR_MAP['stop'].ruta).catch(() => {});
+      cmdEl.textContent = DIR_MAP['stop'].label;
       dotEl.classList.remove('on');
     }
   }
