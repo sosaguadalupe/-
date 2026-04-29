@@ -3,51 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP8266 Robot Monitor - Cian</title>
+    <title>Control de Robot - Cian & Blanco</title>
     <style>
+        /* Estilos Generales */
         body {
             text-align: center;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff; /* Fondo Blanco */
-            color: #333; /* Texto principal oscuro */
+            background-color: #ffffff; /* Fondo Blanco */
+            color: #333333;
             margin: 0;
             padding: 20px;
             user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Pantalla del Sensor */
+        h2 {
+            color: #00A9E0; /* Cian */
+            margin-bottom: 20px;
+        }
+
+        /* Pantalla de Distancia */
         .display-sensor {
-            background: transparent; /* Fondo transparente */
-            color: #00A9E0; /* Cian específico */
+            background-color: #ffffff;
+            color: #00A9E0; /* Texto Cian */
             padding: 20px;
-            border: 4px solid #00A9E0; /* Borde cian */
-            border-radius: 15px;
+            border: 4px solid #00A9E0; /* Borde Cian */
+            border-radius: 20px;
             display: inline-block;
-            width: 250px;
+            width: 240px;
+            box-shadow: 0 4px 15px rgba(0, 169, 224, 0.15);
             margin-bottom: 30px;
-            box-shadow: 0 0 10px rgba(0, 169, 224, 0.2);
         }
 
         .display-sensor small {
-            color: #666;
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.7rem;
             letter-spacing: 2px;
-            font-size: 0.8rem;
             display: block;
-            margin-bottom: 5px;
         }
 
         .valor-distancia {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: bold;
         }
 
-        /* Contenedor del Joystick */
-        .joystick-container {
+        /* Joystick de Botones */
+        .joystick {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 15px;
         }
 
         .fila {
@@ -55,103 +61,91 @@
             gap: 15px;
         }
 
-        /* Estilo de los botones */
+        /* Botones Direccionales */
         .btn {
             width: 85px;
             height: 85px;
-            font-size: 32px;
-            font-weight: bold;
-            border-radius: 50%; /* Botones redondos */
-            border: none;
-            background: #00A9E0; /* Fondo cian específico */
-            color: white; /* Iconos en blanco */
-            cursor: pointer;
-            box-shadow: 0 6px rgba(0, 137, 184, 0.8); /* Sombra cian más oscura */
-            transition: all 0.1s ease-out;
+            background-color: #00A9E0; /* Fondo Cian */
+            color: #ffffff; /* Icono Blanco */
+            text-decoration: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            text-decoration: none;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 2rem;
+            border-radius: 50%;
+            box-shadow: 0 6px #0089B8; /* Sombra Cian Oscuro */
+            transition: all 0.1s ease;
         }
 
         .btn:active {
-            background: #0089B8; /* Cian más oscuro al presionar */
-            box-shadow: 0 2px rgba(0, 86, 115, 0.8);
+            box-shadow: 0 2px #0056b3;
             transform: translateY(4px);
         }
 
-        /* Botón de Parada Central */
+        /* Botón de Parada (Stop) */
         .btn-stop {
-            background: #ffffff; /* Fondo blanco */
-            color: #00A9E0; /* Icono cian */
-            border: 4px solid #00A9E0; /* Borde cian */
-            box-shadow: 0 6px rgba(0, 137, 184, 0.3);
+            background-color: #ffffff;
+            color: #00A9E0;
+            border: 4px solid #00A9E0;
+            box-shadow: 0 6px #e0e0e0;
         }
 
         .btn-stop:active {
-            background: #f0f0f0;
-            box-shadow: 0 2px rgba(0, 86, 115, 0.3);
+            box-shadow: 0 2px #bdbdbd;
         }
 
-        .status-box {
+        /* Estado del Comando */
+        .status-container {
             margin-top: 30px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #666;
         }
 
-        #comando-actual {
-            color: #00A9E0; /* Estado en cian */
+        #cmd {
+            color: #00A9E0;
             font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .update-link {
-            display: inline-block;
-            margin-top: 30px;
-            padding: 12px 24px;
-            background: #ffffff;
-            color: #00A9E0; /* Texto cian */
-            text-decoration: none;
-            border-radius: 8px;
-            border: 2px solid #00A9E0; /* Borde cian */
-            font-size: 16px;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-
-        .update-link:hover {
-            background: #e6f7ff;
         }
     </style>
 </head>
 <body>
 
-    <h2>PANEL DE CONTROL ROBOT</h2>
+    <h2>PANEL DE CONTROL</h2>
 
     <div class="display-sensor">
-        <small>DISTANCIA ULTRASÓNICO</small>
-        <span class="valor-distancia">30 cm</span>
+        <small>Proximidad</small>
+        <span id="dist" class="valor-distancia">--</span> <span style="font-size: 1.5rem;">cm</span>
     </div>
 
-    <div class="joystick-container">
+    <div class="joystick">
         <div class="fila">
             <a href="/up" class="btn">▲</a>
         </div>
         <div class="fila">
             <a href="/left" class="btn">◀</a>
-            <a href="/stop" class="btn btn-stop">■</a> <a href="/right" class="btn">▶</a>
+            <a href="/stop" class="btn btn-stop">■</a>
+            <a href="/right" class="btn">▶</a>
         </div>
         <div class="fila">
             <a href="/down" class="btn">▼</a>
         </div>
     </div>
 
-    <div class="status-box">
-        Último comando: <span id="comando-actual">BLOQUEADO (30cm)</span>
+    <div class="status-container">
+        Comando actual: <span id="cmd">DETENIDO</span>
     </div>
 
-    <a href="#" class="update-link">ACTUALIZAR DATOS</a>
+    <script>
+        setInterval(function() {
+            fetch('/distancia')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('dist').innerHTML = data;
+                })
+                .catch(err => {
+                    // Si no hay conexión, se mantiene en "--"
+                });
+        }, 500);
+    </script>
 
 </body>
 </html>
